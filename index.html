@@ -111,6 +111,9 @@
     <div class="center"><button>play/pause</button></div>
     <div class="center" id="db_status">haven't executed<br></div>
     <div class="center" id="error_status"></div>
+
+    <input type="text" id="input_message" value="">
+
     <script type="text/javascript">
         (function () {
             var version = 1;
@@ -194,7 +197,11 @@
                                 var videoStore = transaction.objectStore("FILE_DATA");
                                 //オブジェクトストアへ取り出しリクエスト
                                 //var getReq = videoStore.get("1");
-                                var getReq = videoStore.get("/idbfs/c614088e1b6ee14d287bd9060496bc47/testMovie.avi");
+
+                                var input_message = document.getElementById("input_message").value;
+
+                                //var getReq = videoStore.get("/idbfs/c614088e1b6ee14d287bd9060496bc47/testMovie.avi");
+                                var getReq = videoStore.get(input_message);
 
                                 //videoオブジェクトストアからのデータの取り出し
                                 getReq.onsuccess = function (event) {
