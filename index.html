@@ -22,4 +22,285 @@
       </div>
     </div>
   </body>
+
+
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inline Movie with IndexedDB</title>
+    <meta name="Description" content="Load movie by using IndexedDB" />
+    <meta name="Keywords" content="JavaScript,HTML5,CSS" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Pragma" content="no-cache">
+
+    <style type="text/css">
+        body {
+            background: #FFFFFF;
+        }
+
+        .title {
+            margin: 10px auto;
+            text-align: center;
+        }
+
+        .movie {
+            text-align: center;
+            margin: 10px auto;
+        }
+
+            .movie video {
+                margin: 0px auto;
+                width: 320px;
+                height: 180px;
+            }
+
+        .center {
+            text-align: center;
+        }
+
+            .center button {
+                font-size: 24px;
+            }
+
+        #myVideo {
+            display: block;
+        }
+    </style>
+</head>
+
+
+
+
+      <head>
+  <script src="//cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.8.3/dist/ffmpeg.min.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+  <h3>Upload a video to transcode to mp4 (x264) and play!</h3>
+  <video id="output-video" controls muted autoplay></video><br />
+  <br>
+  <input type="file" id="uploader">
+  <p id="message"></p>
+  <br>
+
+  <div>
+    <textarea id='log' rows=30 cols=100 autofocus></textarea>
+  </div>
+
+  <br>
+ </body>
+<body>
+    <div class="title">index DBの使用テスト</div>
+    <div class="center"><a href="./deleteIndexedDB.html">indexed DB を消去する</a></div>
+    <div class="movie"><video id="myVideo"></video></div>
+    <div class="center"><button>play/pause</button></div>
+    <div class="center" id="db_status">haven't executed<br></div>
+    <div class="center" id="error_status"></div>
+    <script type="text/javascript">
+        (function () {
+            var version = 1;
+            var movie_url = './testaa.avi';
+            var btn = document.querySelector('button');
+            var video = document.querySelector('#myVideo');
+            var db_status = document.querySelector('#db_status');
+            var error_status = document.querySelector('#error_status');
+
+            var is_video_loaded = false;
+            var is_db_updated = false;
+
+            var togglePlay = function () {
+                if (video.paused) {
+                    if (!is_video_loaded) {
+                        try{
+                            //1.indexedDBを開く
+                            var idbReq = indexedDB.open("/idbfs");
+                            //var idbReq = indexedDB.open("test", version);
+                            db_status.innerText = "opening indexedDB";
+                        } catch (e) {
+                            error_status.innerText = "IndexedDB is not implemented";
+                            return;
+                        }
+
+                        //2.DBの新規作成時、またはバージョン変更時に実行するコード
+                        idbReq.onupgradeneeded = function (event) {
+                            var db = event.target.result;
+                            db_status.innerText = "update database";
+                            //過去にDBを作成したことがなければ作成
+                            if (event.oldVersion < 1 || (event.oldVersion & 0x7fffffffffffffff) < 1) {
+                                console.log("create database");
+                                event.target.result.createObjectStore("video", { keyPath: "video_id" });
+                                db_status.innerHTML += "<br> database created"
+                            }
+
+                            is_db_updated = true;
+
+                            //onupdateneededで呼ばれたtransactionが終了してから処理を行う（既存のtransactionが新規のtransactionをブロックし合う場合がある）
+                            event.target.transaction.oncomplete = function () {
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('GET', movie_url, true);
+                                xhr.responseType = 'arraybuffer';
+                                //IndexedDBを使用した場合との時間差を明確にするため、XMLHttpRequestのキャッシュを無効化（本来は必要なし）
+                                xhr.setRequestHeader('Pragma', 'no-cache');
+                                xhr.setRequestHeader('Cache-Control', 'no-cache');
+                                xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
+
+                                xhr.onload = function (e) {
+                                    db_status.innerText = "movie is loaded"
+                                    try {
+                                        var transaction = db.transaction("video", "readwrite");
+                                        videoStore = transaction.objectStore("video");
+                                        var arraybuffer = e.target.response;
+                                        //データの追加
+                                        videoStore.put({ video_id: "1", video: arraybuffer });
+
+                                        var blob = new Blob([arraybuffer], { type: 'video/avi' });
+                                        var URL = window.URL || window.webkitURL;
+                                        video.src = URL.createObjectURL(blob);
+
+                                        db_status.innerText = "db is updated";
+                                        console.log("updated indexedDB");
+                                    } catch (e) {
+                                        error_status.innerText = e.message;
+                                    }
+                                }
+                                xhr.send();
+                            }
+                        }
+
+                        idbReq.onsuccess = function (event) {
+                            if (!is_db_updated) {
+                                db_status.innerText = "opened DB";
+                                var db = event.target.result;
+                                //"video"オブジェクトストアを読みreadonly権限付きで使用することを宣言
+                                //var transaction = db.transaction("video", "readonly");
+                                var transaction = db.transaction("FILE_DATA", "readonly");
+                                //オブジェクトストアの取り出し
+                                //var videoStore = transaction.objectStore("video");
+                                var videoStore = transaction.objectStore("FILE_DATA");
+                                //オブジェクトストアへ取り出しリクエスト
+                                //var getReq = videoStore.get("1");
+                                var getReq = videoStore.get("/idbfs/c614088e1b6ee14d287bd9060496bc47/testMovie.avi");
+
+                                //videoオブジェクトストアからのデータの取り出し
+                                getReq.onsuccess = function (event) {
+                                    try {
+                                        //var
+                                        //blob = new Blob([event.target.result.video], { type: 'video/avi' });
+                                        blob = new Blob([event.target.result.contents], { type: 'video/avi' });
+                                        transcodetest();
+                                        var URL = window.URL || window.webkitURL;
+                                        video.src = window.URL.createObjectURL(blob);
+                                        //db_status.innerText = "db is opened, and success data load";
+                                    } catch (e) {
+                                        error_status.innerText = e.message;
+                                    }
+                                }
+                                getReq.onerror = function (event) {
+                                    db_status.innerText = "db is opened, but failed data load"
+                                }
+                            }
+                        }
+
+                        idbReq.onerror = function (event) {
+                            db_status.innerText = "failed db open"
+                        }
+
+                        is_video_loaded = true;
+                    }
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            };
+
+            btn.addEventListener('click', togglePlay);
+        })();
+
+
+
+
+            var txt = document.getElementById('log');
+    const {
+      createFFmpeg
+    } = FFmpeg;
+    const ffmpeg = createFFmpeg({
+      log: true,
+      logger: ({
+        message
+      }) => {
+        txt.value += "\n" + message;
+      }
+    });
+
+    const transcode = async ({
+      target: {
+        files
+      }
+    }) => {
+      const message = document.getElementById('message');
+      const {
+        name
+      } = files[0];
+      message.innerHTML = 'Loading ffmpeg-core.js';
+      await ffmpeg.load();
+      await ffmpeg.write(name, files[0]);
+      message.innerHTML = 'Start transcoding';
+      await ffmpeg.transcode(name, 'output.mp4');
+      message.innerHTML = 'Transcoding completed';
+      const data = ffmpeg.read('output.mp4');
+      ffmpeg.remove('output.mp4');
+
+      const video = document.getElementById('output-video');
+      video.src = URL.createObjectURL(new Blob([data.buffer], {
+        type: 'video/mp4'
+      }));
+
+
+    }
+
+    const transcodetest = async () => {
+      const message = document.getElementById('message');
+      // const {
+      //   name
+      // } = moviedata;
+      message.innerHTML = 'Loading ffmpeg-core.js';
+      await ffmpeg.load();
+      //await ffmpeg.write(name, moviedata);
+      //await ffmpeg.write('/idbfs/7e8d80576ac7835943650e9b5af4b7ee/VideoWriterExample_output.avi', blob);
+      await ffmpeg.write('VideoWriterExample_output.avi', blob);
+      message.innerHTML = 'Start transcoding';
+      //await ffmpeg.transcode('/idbfs/7e8d80576ac7835943650e9b5af4b7ee/VideoWriterExample_output.avi', 'output.mp4');
+      await ffmpeg.transcode('VideoWriterExample_output.avi', 'output.mp4');
+      //await ffmpeg.transcode(name, 'output.mp4');
+      message.innerHTML = 'Transcoding completed';
+      const data = ffmpeg.read('output.mp4');
+      ffmpeg.remove('output.mp4');
+
+      const video = document.getElementById('output-video');
+      video.src = URL.createObjectURL(new Blob([data.buffer], {
+        type: 'video/mp4'
+      }));
+
+
+    }
+
+    const elm = document.getElementById('uploader');
+    elm.addEventListener('change', transcode);
+    </script>
+</body>
 </html>
