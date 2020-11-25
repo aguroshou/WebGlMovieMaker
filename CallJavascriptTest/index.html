@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | VRMAppWebGLBuildSample</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+      var unityInstance = UnityLoader.instantiate("unityContainer", "Build/BuildWebGlMovieMakerVer2.json", {onProgress: UnityProgress});
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content">
+      <div id="unityContainer" style="width: 960px; height: 600px"></div>
+      <div class="footer">
+        <div class="webgl-logo"></div>
+        <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
+        <div class="title">VRMAppWebGLBuildSample</div>
+      </div>
+    </div>
+  </body>
+  <script>
+  function hogeMethod(parameter) {
+    console.log(parameter)
+    // C#から指定されていたGameObject名とメソッド名を使ってコールバック処理を行う
+    unityInstance.SendMessage(parameter.callbackGameObjectName, parameter.callbackFunctionName)
+  }
+
+  function recieveMessage(event) {
+  var data = JSON.parse(event.detail)
+  var methodName = data.methodName
+  var parameter = data.parameter
+    try {
+      parameter = JSON.parse(parameter)
+    } catch (e) {
+      parameter = null
+    }
+    // C#から指定されているメソッドを呼び出しparameterを渡す
+    eval(`${methodName}(parameter)`)
+  }
+
+  // unityMessageというCustomEventを受け取る
+  window.addEventListener('unityMessage', recieveMessage, false)
+  </script>
+</html>
