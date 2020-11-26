@@ -325,7 +325,7 @@
   function FfmpegMethod(parameter) {
     console.log(parameter)
     input_message = parameter;
-    togglePlay();
+    togglePlay;
 
     // C#から指定されていたGameObject名とメソッド名を使ってコールバック処理を行う
     unityInstance.SendMessage(parameter.callbackGameObjectName, parameter.callbackFunctionName)
