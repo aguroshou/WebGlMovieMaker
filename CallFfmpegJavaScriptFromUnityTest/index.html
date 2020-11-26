@@ -121,17 +121,28 @@
 
     <script type="text/javascript">
         (function () {
-            var version = 1;
-            var movie_url = './testaa.avi';
-            var btn = document.querySelector('button');
-            var video = document.querySelector('#myVideo');
-            var db_status = document.querySelector('#db_status');
-            var error_status = document.querySelector('#error_status');
+            // var version = 1;
+            // var movie_url = './testaa.avi';
+            // var btn = document.querySelector('button');
+            // var video = document.querySelector('#myVideo');
+            // var db_status = document.querySelector('#db_status');
+            // var error_status = document.querySelector('#error_status');
+            //
+            // var is_video_loaded = false;
+            // var is_db_updated = false;
+            //
+            // var togglePlay = function () {
+            version = 1;
+            movie_url = './testaa.avi';
+            btn = document.querySelector('button');
+            video = document.querySelector('#myVideo');
+            db_status = document.querySelector('#db_status');
+            error_status = document.querySelector('#error_status');
 
-            var is_video_loaded = false;
-            var is_db_updated = false;
+            is_video_loaded = false;
+            is_db_updated = false;
 
-            var togglePlay = function () {
+            togglePlay = function () {
                 if (video.paused) {
                     if (!is_video_loaded) {
                         try{
