@@ -147,7 +147,8 @@
                     if (!is_video_loaded) {
                         try{
                             //1.indexedDBを開く
-                            var idbReq = indexedDB.open("/idbfs");
+                            //var
+                            idbReq = indexedDB.open("/idbfs");
                             //var idbReq = indexedDB.open("test", version);
                             db_status.innerText = "opening indexedDB";
                         } catch (e) {
@@ -338,7 +339,7 @@
     console.log(parameter.callbackMoviePathName)
     input_message = parameter.callbackMoviePathName;
     togglePlay;
-
+    //idbReq.onsuccess;
     // C#から指定されていたGameObject名とメソッド名を使ってコールバック処理を行う
     //unityInstance.SendMessage(parameter.callbackGameObjectName, parameter.callbackFunctionName)
   }
