@@ -121,27 +121,18 @@
 
     <script type="text/javascript">
         (function () {
-            // var version = 1;
-            // var movie_url = './testaa.avi';
-            // var btn = document.querySelector('button');
-            // var video = document.querySelector('#myVideo');
-            // var db_status = document.querySelector('#db_status');
-            // var error_status = document.querySelector('#error_status');
-            //
-            // var is_video_loaded = false;
-            // var is_db_updated = false;
-            //
-            // var togglePlay = function () {
-            version = 1;
-            movie_url = './testaa.avi';
+            var version = 1;
+            var movie_url = './testaa.avi';
+            //var
             btn = document.querySelector('button');
-            video = document.querySelector('#myVideo');
-            db_status = document.querySelector('#db_status');
-            error_status = document.querySelector('#error_status');
+            var video = document.querySelector('#myVideo');
+            var db_status = document.querySelector('#db_status');
+            var error_status = document.querySelector('#error_status');
 
-            is_video_loaded = false;
-            is_db_updated = false;
+            var is_video_loaded = false;
+            var is_db_updated = false;
 
+            //var
             togglePlay = function () {
                 if (video.paused) {
                     if (!is_video_loaded) {
@@ -218,14 +209,12 @@
                                 //動画のパスを手動で入力する
                                 //var input_message = document.getElementById("input_message").value;
 
-                                //var getReq = videoStore.get("/idbfs/c614088e1b6ee14d287bd9060496bc47/testMovie.avi");
                                 var getReq = videoStore.get(input_message);
 
                                 //videoオブジェクトストアからのデータの取り出し
                                 getReq.onsuccess = function (event) {
                                     try {
-                                        //var
-                                        //blob = new Blob([event.target.result.video], { type: 'video/avi' });
+                                        //var無しでグローバル変数にする
                                         blob = new Blob([event.target.result.contents], { type: 'video/avi' });
                                         transcodetest();
                                         var URL = window.URL || window.webkitURL;
@@ -252,7 +241,6 @@
                     video.pause();
                 }
             };
-
             btn.addEventListener('click', togglePlay);
         })();
 
@@ -321,7 +309,18 @@
         type: 'video/mp4'
       }));
 
+      //動画をダウンロード
+      //参照：https://qiita.com/kerupani129/items/99fd7a768538fcd33420
 
+      const a = document.createElement('a');
+      //a.href = URL.createObjectURL(new Blob(['test text\n'], {type: 'text/plain'}));
+      a.href = video.src;
+      a.download = 'movie.mp4';
+
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     const elm = document.getElementById('uploader');
@@ -338,7 +337,12 @@
   function FfmpegMethod(parameter) {
     console.log(parameter.callbackMoviePathName)
     input_message = parameter.callbackMoviePathName;
-    togglePlay;
+    //togglePlay;
+    //btn.addEventListener('click', togglePlay);
+    //window.addEventListener('mousemove', togglePlay);
+
+
+    btn.click();
     //idbReq.onsuccess;
     // C#から指定されていたGameObject名とメソッド名を使ってコールバック処理を行う
     //unityInstance.SendMessage(parameter.callbackGameObjectName, parameter.callbackFunctionName)
